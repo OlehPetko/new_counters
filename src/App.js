@@ -1,53 +1,49 @@
 import './App.css';
 import {useState} from "react";
-import axios from "axios";
-import Task from "./Task";
-
 
 function App() {
-    const [list, setList] = useState([])
-    const [newTask, setNewTask] = useState('')
+    const initialstate = [
+        {id: Math.random(), value: 1, buttons: [1]},
+        {id: Math.random(), value: 2, buttons: [1, 2]},
+        {id: Math.random(), value: 3, buttons: [1, 2, 3]},
 
-
-    const getList = () => {
-        axios.get('https://nazarov-kanban-server.herokuapp.com/card')
-            .then(res => {
-                console.log(res)
-                setList(res.data)
-            })
-            .catch(error => {
-                console.log(error)
-            })
+    ]
+    const [count, setCount] = useState(0)
+    const [counters, setCounters] = useState(initialstate)
+    const plusAndMinus = (value) => {
+        const newCount = setCount(count + value)
     }
-    const createCard = async () => {
-      await  axios.post('https://nazarov-kanban-server.herokuapp.com/card', {
-            name: newTask,
-            description: 'I love draw'
-        })
-            .then(res => console.log(res))
-            .catch(error => console.log(error))
-        getList()
-        setNewTask('')
+    const plusAndMinusCounters = (id, value) => {
+        const newCounters = counters.map(el => el.id === id ? ({...el, value: el.value + value}) : el)
+        setCounters(newCounters)
     }
-    const deleteCard =  async (id) => {
-      await axios.delete(`https://nazarov-kanban-server.herokuapp.com/card/${id}`)
-          .then(res => console.log(res))
-          .catch(error => console.log(error))
-        getList()
+    const addCounter = () => {
+      const newConter = [...counters,  {id: Math.random(), value: 4, buttons: [1, 2, 3, 4]} ]
+        setCounters(newConter)
     }
 
 
     return (
         <div className="App">
-            <button onClick={getList}>getTask</button>
-            <input type="text" value={newTask} onChange={event => setNewTask(event.target.value)}/>
-            <button onClick={createCard}>create new card</button>
-            {list.map(task =>
-                <div>
-                    <Task task={task} deleteCard={deleteCard}/>
+            <button onClick={() => plusAndMinus(+1)}>+1</button>
+            {count}
+            <button onClick={() => plusAndMinus(-1)}>-1</button>
+            <hr/>
+            <button onClick={addCounter}>add counter</button>
+            {counters.map(el =>
+                <div key={el.id}>
+                    {el.buttons.map(butt =>
+                        <button onClick={() => plusAndMinusCounters(el.id, - butt)}>
+                            {-butt}
+                        </button>
+                    )}
+                    {el.value}
+                    {el.buttons.map(butt =>
+                        <button onClick={() => plusAndMinusCounters(el.id, butt)}>
+                            {butt}
+                        </button>)}
                 </div>
             )}
-
         </div>
     );
 }
